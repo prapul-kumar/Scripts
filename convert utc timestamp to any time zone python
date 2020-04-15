@@ -1,0 +1,10 @@
+import time
+import calendar
+import datetime
+import pytz
+time_zone = pytz.timezone("America/Chicago")
+timestr=datetime.datetime(2020,4,5,14,37,0)
+dd=timestr.replace(tzinfo=pytz.utc)
+dt = dd.astimezone(time_zone)
+dd=dt.replace(tzinfo=None)
+print(str(dd))
