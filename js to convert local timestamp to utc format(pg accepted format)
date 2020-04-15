@@ -1,0 +1,8 @@
+    var monthNames = {"Jan":"01", "Feb":"02", "Mar":"03", "Apr":"04", "May":"05", "Jun":"06","Jul":"07", "Aug":"08", "Sep":"09", "Oct":"10", "Nov":"11", "Dec":"12"};
+                  //end_date=2020-04-23
+   start_timestamp=end_date+" "+end_hour+':'+end_min+':'+'00' //"2020-04-23 11:03:00"
+    d=start_timestamp.split(/[\s-:]+/); //split the timestamp using - and :
+    var dd = new Date(d[0],d[1]-1,d[2],d[3],d[4],d[5]); #create a new date object
+    start_timestamp=dd.toUTCString();   #now given time stamp is converted into utc
+    st=start_timestamp.split(/[\s:]+/); #for reformatting and getting into the format eg(2020-04-23 11:03:00")
+    start_timestamp=st[3]+"-"+monthNames[st[2]]+"-"+st[1]+" "+st[4]+":"+st[5]+":"+"00"
