@@ -1,0 +1,71 @@
+import datetime
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+from email import encoders
+from email.utils import formatdate
+
+
+def send_calinvite(from_mailid, to_mailid, body, location_name, start_time, end_time,uid):
+    CRLF = "\r\n"
+    attendees = to_mailid
+    organizer = "CN=organiser:mailto:"+from_mailid
+    fro = from_mailid
+    location = location_name
+    dtstart = start_time
+    dtend = end_time
+    invite_body = body
+    ddtstart=start_time
+
+    ddtstart = datetime.datetime.now()
+    dtoff = datetime.timedelta(days=1)
+    dur = datetime.timedelta(hours=1)
+    ddtstart = ddtstart + dtoff
+    dtend = ddtstart + dur
+    dtstamp = datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ")
+    dtstart = start_time
+    dtend = end_time
+
+    description = "DESCRIPTION: test invitation from pyICSParser" + CRLF
+    attendee = ""
+    for att in attendees:
+        attendee += "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-    PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE" + CRLF + " ;CN=" + att + ";X-NUM-GUESTS=0:" + CRLF + " mailto:" + att + CRLF
+    ical = "BEGIN:VCALENDAR" + CRLF + "PRODID:pyICSParser" + CRLF + "VERSION:2.0" + CRLF + "CALSCALE:GREGORIAN" + CRLF
+    ical += "METHOD:REQUEST" + CRLF + "BEGIN:VEVENT" + CRLF + "DTSTART:" + dtstart + CRLF + "DTEND:" + dtend + CRLF + "DTSTAMP:" + dtstamp + CRLF + organizer + CRLF
+    ical += "UID:"+uid+CRLF + dtstamp + CRLF
+    ical += attendee + "CREATED:" + dtstamp + CRLF + description + "LAST-MODIFIED:" + CRLF + "LOCATION:" + CRLF + "SEQUENCE:0" + CRLF + "STATUS:CONFIRMED" + CRLF
+    ical += "SUMMARY:test " + ddtstart.strftime(
+        "%Y%m%d @ %H:%M") + CRLF + "TRANSP:OPAQUE" + CRLF + "END:VEVENT" + CRLF + "END:VCALENDAR" + CRLF
+
+    msg = MIMEMultipart('mixed')
+    msg['Reply-To'] = fro
+    msg['Date'] = formatdate(localtime=True)
+    msg['Subject'] = "yo"
+    msg['From'] = fro
+    msg['To'] = ",".join(attendees)
+
+    part_email = MIMEText(invite_body,"html")
+    part_cal = MIMEText(ical,'calendar;method=REQUEST')
+
+    msgAlternative = MIMEMultipart('alternative')
+    msg.attach(msgAlternative)
+
+    ical_atch = MIMEBase('application/ics',' ;name="%s"'%("invite.ics"))
+    ical_atch.set_payload(ical)
+    encoders.encode_base64(ical_atch)
+    ical_atch.add_header('Content-Disposition', 'attachment; filename="%s"'%("invite.ics"))
+
+    eml_atch = MIMEBase('text/plain',1)
+
+    eml_atch.add_header('Content-Transfer-Encoding', "")
+
+    msgAlternative.attach(part_email)
+    msgAlternative.attach(part_cal)
+
+    smtp = smtplib.SMTP()
+    smtp.connect("smtplb.cerner.com", 25)
+    smtp.sendmail(fro, attendees, msg.as_string())
+    smtp.quit()
+
+send_calinvite("test@cerner.com", ["prapul.a@cerner.com"], "yo", "c2", "20200420T164400Z", "20200420T204400Z","2@p")
