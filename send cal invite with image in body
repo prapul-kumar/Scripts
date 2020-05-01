@@ -1,0 +1,76 @@
+
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+from email import encoders
+from email.utils import formatdate
+
+
+CRLF = "\r\n"
+attendees = ["prapul.a@cerner.com"]
+organizer_emailId = "test.a@cerner.com"
+organizer = "CN=organiser:mailto:"+organizer_emailId
+fro = "<test.a@cerner.com>"
+location="C2"
+dtstart = "20200415T104600Z"
+dtend = "20200415T114600Z"
+
+#description = "DESCRIPTION: test invitation from pyICSParser"+CRLF
+attendee = ""
+for att in attendees:
+    attendee += "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-    PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE"+CRLF+" ;CN="+att+";X-NUM-GUESTS=0:"+CRLF+" mailto:"+att+CRLF
+ical = "BEGIN:VCALENDAR"+CRLF+"PRODID:pyICSParser"+CRLF+"VERSION:2.0"+CRLF+"CALSCALE:GREGORIAN"+CRLF
+ical+="METHOD:REQUEST"+CRLF+"BEGIN:VEVENT"+CRLF+"DTSTART:"+dtstart+CRLF+"DTEND:"+dtend+CRLF+"DTSTAMP:"+dtstart+CRLF+organizer+CRLF
+ical+= "UID:FIXMEUID"+CRLF
+ical+= attendee+"CREATED:"+CRLF+"LAST-MODIFIED:"+CRLF+"LOCATION:"+location+CRLF+"SEQUENCE:0"+CRLF+"STATUS:CONFIRMED"+CRLF
+ical+= "SUMMARY:test "+"20200415T114600Z"+CRLF+"TRANSP:OPAQUE"+CRLF+"END:VEVENT"+CRLF+"END:VCALENDAR"+CRLF
+
+invite_body = "Yo Nagesh Thankyou for registring for the event"
+
+msg = MIMEMultipart('mixed')
+msg['Reply-To']=fro
+msg['Date'] = formatdate(localtime=True)
+msg['Subject'] = "yo"
+msg['From'] = fro
+msg['To'] = ",".join(attendees)
+invite_body = '<html><body><h1>Hello</h1>'+'<p><img src="cid:0"></p>'+'</body></html>'
+
+
+part_email = MIMEText(invite_body , "html")
+
+with open('C:\\Users\\PK078323\\Desktop\\BookMyEvent\\media\\Capture.png', 'rb') as f:
+    # set attachment mime and file name, the image type is png
+    mime = MIMEBase('image', 'png', filename='Capture.png')
+    # add required header data:
+    mime.add_header('Content-Disposition', 'attachment', filename='Capture.png')
+    mime.add_header('X-Attachment-Id', '0')
+    mime.add_header('Content-ID', '<0>')
+    # read attachment file content into the MIMEBase object
+    mime.set_payload(f.read())
+    # encode with base64
+    encoders.encode_base64(mime)
+    # add MIMEBase object to MIMEMultipart object
+    msg.attach(mime)
+
+part_cal = MIMEText(ical,'calendar;method=REQUEST')
+
+msgAlternative = MIMEMultipart('alternative')
+msg.attach(msgAlternative)
+
+ical_atch = MIMEBase('application/ics',' ;name="%s"'%("invite.ics"))
+ical_atch.set_payload(ical)
+encoders.encode_base64(ical_atch)
+ical_atch.add_header('Content-Disposition', 'attachment; filename="%s"'%("invite.ics"))
+
+eml_atch = MIMEBase('text/plain',1)
+
+eml_atch.add_header('Content-Transfer-Encoding', "")
+
+msgAlternative.attach(part_email)
+msgAlternative.attach(part_cal)
+
+smtp = smtplib.SMTP()
+smtp.connect("smtplb.cerner.com", 25)
+smtp.sendmail(fro, attendees, msg.as_string())
+smtp.quit()
