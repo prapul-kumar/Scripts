@@ -59,5 +59,6 @@ def cancel_calinvite(from_mailid, to_mailid, body, location_name, start_time, en
     smtp.sendmail(fro, attendees, msg.as_string())
     smtp.quit()
     
+   #example start_time_cal = 20200420T164400Z  this should be the format for start and end time
 cancel_calinvite("from_address", [email_id1,email_id2,....],body,session_location,start_time_cal, end_time_cal,subject, uid)
 #uid should be the same which was used when sending the cal invite
