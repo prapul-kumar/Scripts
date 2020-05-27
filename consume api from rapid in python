@@ -1,0 +1,59 @@
+this is an example of fetching a server details from remedy
+
+
+import requests
+import json
+import time
+from pandas import read_excel
+from oauthlib.oauth2 import BackendApplicationClient
+from requests.auth import HTTPBasicAuth
+from requests_oauthlib import OAuth2Session
+from configparser import ConfigParser
+
+server_name = request.query_params.get('server_name',None)  
+    with open("api_config.json", "r") as read_file:            # for safety place the tokens etc info in a external .json file
+        data = json.load(read_file)
+    
+    client_id = data["client_id"]
+    client_secret = data["client_secret"]                 # all these values are from the external .json
+    token = data["token"]
+    
+ #===========================================optional way to get the access tocken======================#
+#Use '''the Resource Owner Client Credentials Grant Type flow to obtain an access token.
+auth = HTTPBasicAuth(client_id, client_secret)
+client = BackendApplicationClient(client_id=client_id)
+oauth = OAuth2Session(client=client)
+token = oauth.fetch_token(token_url='https://apicrt.cerner.com:8243/token', auth=auth)'''
+ #===========================================end========================================================#
+ 
+    
+    api_url = "https://rapid-staging.cerner.com:8243/remedy-ci-query/v1/query/CI/relationship/"  #api url that should be hit
+    
+    api_call_headers = {"Content-Type": "application/json",
+                            "Accept": "application/json",           
+                            'Authorization': 'Bearer ' + token}   # if we use the optional way to get the tocken then replace token with "token['access_token']"
+                            
+                            
+    with open("config.json", "r") as read_file:                   # the request body should be placed in a external .json file and read from there
+        data = json.load(read_file)
+        a = server_name+"%"                                   #here we are passign the server name '% is used as a like operator'
+        data["ListOfWhereParameters"]["Field"][1]["value"]=a  #assigning the server name to the external .json ie.,to the request body(so when we created the exteranl .json and placed the request body, we have a bank field there which will take the server name as its value"tht is what is being assigned here )
+    json_object = json.dumps(data, indent=4)
+
+    try:
+       # print("json_file",data)
+        response = requests.post(api_url, headers=api_call_headers, data=json_object) #hitting the api
+        #print("resp",response.text)
+    except Exception as error:
+        #print("error=",error)
+        return "N/A"
+
+    full_result = response.json()
+    test = response.text
+
+    if len(full_result)!=0 and full_result is not None:
+        temp_result = full_result["ListOfRelationshipFields"][0]["Field"][1]["value"] #fetching the data of interest
+        result = temp_result.split('-')[0] 
+        return result
+    else:
+        return "N/A"
