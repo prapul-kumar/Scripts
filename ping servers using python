@@ -1,0 +1,12 @@
+import subprocess
+import os
+import json
+ping_list = ["www.google.com","www.youtube.com"]
+result={}
+for server in ping_list:
+    ping_string = "sudo pingparsing "+server  # pingparsing is a python module ... (pip install pingparsing)
+    need_sh = True   #for windows make it False
+    b = (subprocess.check_output(ping_string, shell=True)).decode('utf-8') #check_output is used to get the console result back to our script
+    a = json.loads(b)
+    result[server] = a[server]["rtt_avg"] # assign result to a dictionary 
+    print(result)
