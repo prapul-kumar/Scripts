@@ -1,10 +1,11 @@
-import time
-import calendar
+converting from IST to CST
+
 import datetime
-import pytz
-time_zone = pytz.timezone("America/Chicago")
-timestr=datetime.datetime(2020,4,5,14,37,0)
-dd=timestr.replace(tzinfo=pytz.utc)
-dt = dd.astimezone(time_zone)
-dd=dt.replace(tzinfo=None)
+import pytz    #pip install
+time_zone = pytz.timezone("America/Chicago")   
+time_zone1 = pytz.timezone("Asia/Kolkata")   # input example: '2020-06-29 11:38:00'
+timestr=time_zone1.localize(datetime.datetime(2020,6,29,11,38,0)) #given a time stamp without time zone, we use localize method to attach the time zone from which we want to convert(in this case IST)
+print(timestr) #restult:  2020-06-29 11:38:00+05:30
+dt = timestr.astimezone(time_zone) converting to required timezone(cst in this case)
+dd=dt.replace(tzinfo=None) #remove the time zone info if required
 print(str(dd))
