@@ -1,0 +1,47 @@
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import make_msgid
+import os
+from email.mime.image import MIMEImage
+import mimetypes
+from email.message import EmailMessage
+from email.mime.base import MIMEBase
+
+# Define these once; use them twice!
+
+# Create the root message and fill in the from, to, and subject headers
+msgRoot = MIMEMultipart('related')
+msgRoot['Subject'] = 'test message'
+msgRoot['From'] = "Lens@cerner.com"
+msgRoot['To'] = "prapul.a@cerner.com"
+msgRoot.preamble = 'This is a multi-part message in MIME format.'
+
+# Encapsulate the plain and HTML versions of the message body in an
+# 'alternative' part, so message agents can decide which they want to display.
+msgAlternative = MIMEMultipart('alternative')
+msgRoot.attach(msgAlternative)
+
+msgText = MIMEText('This is the alternative plain text message.')
+msgAlternative.attach(msgText)
+
+# We reference the image in the IMG SRC attribute by the ID we give it below
+msgText = MIMEText('<b>Some <i>HTML</i> text</b> and an image.<br><img src="cid:image1"><br>Nifty!', 'html')
+msgAlternative.attach(msgText)
+
+# This example assumes the image is in the current directory
+fp = open('C:\\Users\\PK078323\\Desktop\\Lens1\\GlobalOps\\static\\assets\\default.png', 'rb')
+msgImage = MIMEImage(fp.read())
+fp.close()
+
+# Define the image's ID as referenced above
+msgImage.add_header('Content-ID', '<image1>')
+msgRoot.attach(msgImage)
+
+# Send the email (this example assumes SMTP authentication is required)
+
+smtp = smtplib.SMTP()
+smtp.connect('smtplb.cerner.com',25)
+from_addr = "Lens@cerner.com"
+smtp.sendmail(from_addr, "prapul.a@cerner.com", msgRoot.as_string())
+smtp.quit()
