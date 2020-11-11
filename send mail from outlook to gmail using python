@@ -1,8 +1,9 @@
 import emails
-message = emails.html(html="<p>Hi!<br>Here is your receipt...",
-                       subject="Your receipt No. 567098123",
-                       mail_from=('Prapul', 'prapul.a@cerner.com'))
-
-#message.attach(data=open('bill.pdf'), filename='bill.pdf')
-r = message.send(to='kumar.prapul@gmail.com', smtp={'host': 'smtplb.cerner.com', 'timeout': 5})
-assert r.status_code == 250
+from email.mime.image import MIMEImage
+with open('C:\\Users\\PK078323\\Desktop\\expo-space.png', 'rb') as img:
+    msgImage = img.read()
+    message = emails.html(html="<p>Hi!<br>Here is your receipt...",
+                        subject="Your receipt No. 567098123",
+                        mail_from=('Prapul', 'prapul.a@cerner.com'))
+    message.attach(data=msgImage,filename='expo-space.png')
+    r = message.send(to='kumar.prapul@gmail.com', smtp={'host': 'smtplb.cerner.com', 'timeout': 5})
