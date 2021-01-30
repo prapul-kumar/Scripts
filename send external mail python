@@ -1,0 +1,11 @@
+from mailer import Mailer
+from mailer import Message
+from datetime import datetime
+now = str(datetime.now())
+message = Message(From="test@cerner.com",To="nese.manjunath@yahoo.com",charset="utf-8")
+message.Subject = "Test "+now
+message.Html = """Test <strong>HTML</strong>!"""
+message.Body = """This is alternate text."""
+sender = Mailer('smtplb.cerner.com',port=25)
+sender.send(message)
+print("mail sent ",now)
